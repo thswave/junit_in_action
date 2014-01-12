@@ -3,14 +3,12 @@ package com.changwon.junit.ch3;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.omg.CORBA.portable.ResponseHandler;
-
 public class DefaultController implements Controller {
 
 	@SuppressWarnings("rawtypes")
 	private Map requestHandlers = new HashMap();
 
-	private RequestHandler getHandler(Request request) {
+	protected RequestHandler getHandler(Request request) {
 		if (!this.requestHandlers.containsKey(request.getName())) {
 			String message = "Cannot find handler for request name" + "["
 					+ request.getName() + "]";
@@ -32,7 +30,7 @@ public class DefaultController implements Controller {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void addHandler(Request request, ResponseHandler requestHandler) {
+	public void addHandler(Request request, RequestHandler requestHandler) {
 		if (this.requestHandlers.containsKey(request.getName())) {
 			throw new RuntimeException("A request handler has already been "
 					+ "registered for request name [" + request.getName() + "]");
