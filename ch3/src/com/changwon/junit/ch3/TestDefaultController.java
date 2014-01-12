@@ -2,6 +2,7 @@ package com.changwon.junit.ch3;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
 import org.junit.Before;
@@ -23,18 +24,29 @@ public class TestDefaultController {
 	}
 
 	@Test
-	@Ignore
-	public void testMethod() {
-		throw new RuntimeException("implement me");
-	}
-
-	@Test
 	public void testAddHandler() {
 		RequestHandler handler2 = controller.getHandler(request);
 		assertSame(
 				"Handler we set in controller should be the same handler we get",
 				handler2, handler);
 
+	}
+	
+	@Test(expected=RuntimeException.class)
+	public void testGetHandlerNotDefined(){
+		SampleRequest request = new SampleRequest("testNotDefined");
+		
+		// RuntimeException point
+		controller.getHandler(request);
+	}
+	
+	@Test(expected=RuntimeException.class)
+	public void testAddRequestDuplicateName(){
+		SampleRequest request = new SampleRequest();
+		SampleHandler handler = new SampleHandler();
+		
+		// RuntimeException point
+		controller.addHandler(request, handler);
 	}
 
 	@Test
@@ -53,6 +65,21 @@ public class TestDefaultController {
 		Response response = controller.processRequest(request);
 		assertNotNull("Must not return a null response", response);
 		assertEquals(ErrorResponse.class, response.getClass());
+	}
+	
+	@Test(timeout=130)
+	@Ignore(value="Ignore for now until we decide a decent time-limit")
+	public void testProcessMultipleRequestsTimeout(){
+		Request request;
+		Response response;
+		RequestHandler handler = new SampleHandler();
+		for (int i = 0; i < 99999; i++) {
+			request = new SampleRequest(String.valueOf(i));
+			controller.addHandler(request, handler);
+			response = controller.processRequest(request);
+			assertNotNull(response);
+			assertNotSame(ErrorResponse.class, response.getClass());
+		}
 	}
 
 	private class SampleRequest implements Request {
